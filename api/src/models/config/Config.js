@@ -56,47 +56,44 @@ const SubSectionField = sequelize.define('SubSectionField', {
   isRequired: { type: DataTypes.BOOLEAN, defaultValue: false },
 
   groupLabel: { type: DataTypes.STRING, allowNull: true },
-  
+
   // Logic Conditional (Parent-Child)
-  parentId: { type: DataTypes.INTEGER, allowNull: true }, 
+  parentId: { type: DataTypes.INTEGER, allowNull: true },
   triggerValue: { type: DataTypes.STRING, allowNull: true }
 }, { tableName: 'subsection_field', timestamps: false });
 
 // --- DEFINISI RELASI (PENTING!) ---
 
-// Option <-> OptionValue
+// 1. Option <-> OptionValue
 Option.hasMany(OptionValue, { foreignKey: 'optionId' });
 OptionValue.belongsTo(Option, { foreignKey: 'optionId' });
 
-// Field <-> Option
+// 2. Field <-> Option
 Option.hasMany(Field, { foreignKey: 'optionId' });
 Field.belongsTo(Option, { foreignKey: 'optionId' });
 
-// Form -> Section -> SubSection
+// 3. Form -> Section -> SubSection
 Form.hasMany(Section, { foreignKey: 'formId' });
 Section.belongsTo(Form, { foreignKey: 'formId' });
 
 Section.hasMany(SubSection, { foreignKey: 'sectionId' });
 SubSection.belongsTo(Section, { foreignKey: 'sectionId' });
 
-// Many-to-Many (SubSection <-> Field)
-// Kita pakai alias 'Fields' agar saat di-include namanya rapi
-SubSection.belongsToMany(Field, {
-  through: SubSectionField,
-  foreignKey: 'subSectionId',
-  otherKey: 'fieldId'
-});
-Field.belongsToMany(SubSection, {
-  through: SubSectionField,
-  foreignKey: 'fieldId',
-  otherKey: 'subSectionId'
-});
-
-// Relasi Tambahan ke Pivot (Penting buat ambil parentId dkk)
-SubSection.hasMany(SubSectionField, { foreignKey: 'subSectionId' });
+// 4. Hubungan SubSection ke SubSectionField (Pivot)
+// Ini yang paling krusial buat narik data form baris demi baris
+SubSection.hasMany(SubSectionField, { foreignKey: 'subSectionId', as: 'SubSectionFields' });
 SubSectionField.belongsTo(SubSection, { foreignKey: 'subSectionId' });
 
-module.exports = { 
-  Form, Section, SubSection, Field, 
-  SubSectionField, Option, OptionValue 
+// 5. Hubungan SubSectionField (Pivot) ke Field (Master)
+// Tambahkan ini supaya bisa narik info Field dari pivot
+SubSectionField.belongsTo(Field, { foreignKey: 'fieldId' });
+Field.hasMany(SubSectionField, { foreignKey: 'fieldId' });
+
+// (Opsional) Many-to-Many tetap boleh ada tapi jarang dipakai kalau sudah ada relasi di atas
+SubSection.belongsToMany(Field, { through: SubSectionField, foreignKey: 'subSectionId', otherKey: 'fieldId' });
+Field.belongsToMany(SubSection, { through: SubSectionField, foreignKey: 'fieldId', otherKey: 'subSectionId' });
+
+module.exports = {
+  Form, Section, SubSection, Field,
+  SubSectionField, Option, OptionValue
 };

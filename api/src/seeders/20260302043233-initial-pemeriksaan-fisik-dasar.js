@@ -81,7 +81,6 @@ module.exports = {
 
       // Tanda Vital Pernafasan
       { id: 119, fieldType: 'number', labelId: 'Pernafasan', labelEn: 'Pernafasan', satuanId: 'x/menit', satuanEn: 'x/minute', optionId: null, validation: null },
-      { id: 120, fieldType: 'radio', labelId: 'Irama', labelEn: 'Irama', optionId: 3, validation: null },
 
       { id: 121, fieldType: 'number', labelId: 'Tinggi Badan', labelEn: 'Tinggi Badan', satuanId: 'cm', satuanEn: 'cm', optionId: null, validation: null },
       { id: 122, fieldType: 'number', labelId: 'Berat Badan', labelEn: 'Berat Badan', satuanId: 'kg', satuanEn: 'kg', optionId: null, validation: null },
@@ -99,43 +98,47 @@ module.exports = {
 
     // 7. Mapping
     await queryInterface.bulkInsert('subsection_field', [
-      { subSectionId: 1, fieldId: 101, order: 1, isRequired: true, parentId: null, triggerValue: null },
-      { subSectionId: 1, fieldId: 102, order: 2, isRequired: true, parentId: null, triggerValue: null },
-      { subSectionId: 1, fieldId: 103, order: 3, isRequired: true, parentId: null, triggerValue: null },
-      { subSectionId: 1, fieldId: 104, order: 4, isRequired: true, parentId: null, triggerValue: null },
-      { subSectionId: 1, fieldId: 105, order: 5, isRequired: true, parentId: null, triggerValue: null },
-      { subSectionId: 1, fieldId: 106, order: 6, isRequired: true, parentId: null, triggerValue: null },
-      { subSectionId: 2, fieldId: 107, order: 1, isRequired: true, parentId: null, triggerValue: null },
-      { subSectionId: 2, fieldId: 108, order: 2, isRequired: true, parentId: null, triggerValue: null },
-      { subSectionId: 2, fieldId: 109, order: 3, isRequired: true, parentId: null, triggerValue: null },
-      { subSectionId: 2, fieldId: 110, order: 4, isRequired: true, parentId: null, triggerValue: null },
-      { subSectionId: 2, fieldId: 111, order: 5, isRequired: true, parentId: null, triggerValue: null },
-      { subSectionId: 2, fieldId: 112, order: 6, isRequired: true, parentId: null, triggerValue: null },
+      // SubSection 1 & 2 (Flat)
+      { id: 1, subSectionId: 1, fieldId: 101, order: 1, isRequired: true, parentId: null, triggerValue: null },
+      { id: 2, subSectionId: 1, fieldId: 102, order: 2, isRequired: true, parentId: null, triggerValue: null },
+      { id: 3, subSectionId: 1, fieldId: 103, order: 3, isRequired: true, parentId: null, triggerValue: null },
+      { id: 4, subSectionId: 1, fieldId: 104, order: 4, isRequired: true, parentId: null, triggerValue: null },
+      { id: 5, subSectionId: 1, fieldId: 105, order: 5, isRequired: true, parentId: null, triggerValue: null },
+      { id: 6, subSectionId: 1, fieldId: 106, order: 6, isRequired: true, parentId: null, triggerValue: null },
+      { id: 7, subSectionId: 2, fieldId: 107, order: 1, isRequired: true, parentId: null, triggerValue: null },
+      { id: 8, subSectionId: 2, fieldId: 108, order: 2, isRequired: true, parentId: null, triggerValue: null },
+      { id: 9, subSectionId: 2, fieldId: 109, order: 3, isRequired: true, parentId: null, triggerValue: null },
+      { id: 10, subSectionId: 2, fieldId: 110, order: 4, isRequired: true, parentId: null, triggerValue: null },
+      { id: 11, subSectionId: 2, fieldId: 111, order: 5, isRequired: true, parentId: null, triggerValue: null },
+      { id: 12, subSectionId: 2, fieldId: 112, order: 6, isRequired: true, parentId: null, triggerValue: null },
 
-      // Tanda Vital
-      { subSectionId: 3, groupLabel: "a.", fieldId: 113, order: 1, isRequired: true, parentId: null, triggerValue: null },
-      { subSectionId: 3, fieldId: 114, order: 2, isRequired: true, parentId: 113, triggerValue: null },
-      { subSectionId: 3, fieldId: 115, order: 3, isRequired: true, parentId: 113, triggerValue: null },
-      { subSectionId: 3, groupLabel: "b.", fieldId: 116, order: 4, isRequired: true, parentId: null, triggerValue: null },
-      { subSectionId: 3, groupLabel: "c.", fieldId: 117, order: 5, isRequired: true, parentId: null, triggerValue: null },
-      { subSectionId: 3, groupLabel: "d.", fieldId: 119, order: 6, isRequired: true, parentId: null, triggerValue: null },
-      { subSectionId: 3, fieldId: 120, order: 7, isRequired: true, parentId: 119, triggerValue: null },
-      { subSectionId: 3, groupLabel: "e.", fieldId: 118, order: 8, isRequired: false, parentId: null, triggerValue: null },
+      // Tanda Vital (SubSection 3)
+      { id: 13, subSectionId: 3, groupLabel: "a.", fieldId: 113, order: 1, isRequired: true, parentId: null, triggerValue: null },
+      { id: 14, subSectionId: 3, fieldId: 114, order: 2, isRequired: true, parentId: 13, triggerValue: null }, // parentId ke id 13
+      { id: 15, subSectionId: 3, fieldId: 115, order: 3, isRequired: true, parentId: 13, triggerValue: null }, // parentId ke id 13
+      { id: 16, subSectionId: 3, groupLabel: "b.", fieldId: 116, order: 4, isRequired: true, parentId: null, triggerValue: null },
+      { id: 17, subSectionId: 3, groupLabel: "c.", fieldId: 117, order: 5, isRequired: true, parentId: null, triggerValue: null },
+      { id: 18, subSectionId: 3, groupLabel: "d.", fieldId: 119, order: 6, isRequired: true, parentId: null, triggerValue: null },
+      { id: 19, subSectionId: 3, fieldId: 115, order: 7, isRequired: true, parentId: 18, triggerValue: null }, // parentId ke id 18
+      { id: 20, subSectionId: 3, groupLabel: "e.", fieldId: 118, order: 8, isRequired: false, parentId: null, triggerValue: null },
 
-      { subSectionId: 4, groupLabel: "a.", fieldId: 121, order: 1, isRequired: true, parentId: null, triggerValue: null },
-      { subSectionId: 4, groupLabel: "a.", fieldId: 122, order: 2, isRequired: true, parentId: null, triggerValue: null },
-      { subSectionId: 4, groupLabel: "a.", fieldId: 123, order: 3, isRequired: true, parentId: null, triggerValue: null },
-      { subSectionId: 4, groupLabel: "a.", fieldId: 124, order: 4, isRequired: true, parentId: null, triggerValue: null },
-      { subSectionId: 4, groupLabel: "b.", fieldId: 125, order: 4, isRequired: true, parentId: null, triggerValue: null },
-      { subSectionId: 4, groupLabel: "c.", fieldId: 118, order: 5, isRequired: false, parentId: null, triggerValue: null },
+      // SubSection 4
+      { id: 21, subSectionId: 4, groupLabel: "a.", fieldId: 121, order: 1, isRequired: true, parentId: null, triggerValue: null },
+      { id: 22, subSectionId: 4, groupLabel: "a.", fieldId: 122, order: 2, isRequired: true, parentId: null, triggerValue: null },
+      { id: 23, subSectionId: 4, groupLabel: "a.", fieldId: 123, order: 3, isRequired: true, parentId: null, triggerValue: null },
+      { id: 24, subSectionId: 4, groupLabel: "a.", fieldId: 124, order: 4, isRequired: true, parentId: null, triggerValue: null },
+      { id: 25, subSectionId: 4, groupLabel: "b.", fieldId: 125, order: 5, isRequired: true, parentId: null, triggerValue: null },
+      { id: 26, subSectionId: 4, groupLabel: "c.", fieldId: 118, order: 6, isRequired: false, parentId: null, triggerValue: null },
 
-      { subSectionId: 5, groupLabel: "a.", fieldId: 126, order: 1, isRequired: true, parentId: null, triggerValue: null },
-      { subSectionId: 5, groupLabel: "b.", fieldId: 127, order: 2, isRequired: true, parentId: null, triggerValue: null },
-      { subSectionId: 5, fieldId: 128, order: 3, isRequired: true, parentId: 127, triggerValue: "Tidak Normal" },
-      { subSectionId: 5, groupLabel: "Tumor:", fieldId: 129, order: 4, isRequired: true, parentId: 127, triggerValue: "Tidak Normal" },
-      { subSectionId: 5, groupLabel: "Tumor:", fieldId: 130, order: 5, isRequired: true, parentId: 127, triggerValue: "Tidak Normal" },
-      { subSectionId: 5, groupLabel: "Tumor:", fieldId: 131, order: 6, isRequired: true, parentId: 127, triggerValue: "Tidak Normal" },
-      { subSectionId: 5, groupLabel: "c.", fieldId: 118, order: 7, isRequired: false, parentId: null, triggerValue: null },
+      // SubSection 5 (With Trigger Logic)
+      { id: 27, subSectionId: 5, groupLabel: "a.", fieldId: 126, order: 1, isRequired: true, parentId: null, triggerValue: null },
+      { id: 28, subSectionId: 5, groupLabel: "b.", fieldId: 127, order: 2, isRequired: true, parentId: null, triggerValue: null },
+      { id: 29, subSectionId: 5, fieldId: 128, order: 3, isRequired: true, parentId: 28, triggerValue: "Tidak Normal" }, // parentId ke id 28
+      { id: 30, subSectionId: 5, fieldId: 118, order: 4, isRequired: false, parentId: 29, triggerValue: null },
+      { id: 31, subSectionId: 5, groupLabel: "Tumor:", fieldId: 129, order: 5, isRequired: true, parentId: 28, triggerValue: "Tidak Normal" }, // parentId ke id 28
+      { id: 32, subSectionId: 5, groupLabel: "Tumor:", fieldId: 130, order: 6, isRequired: true, parentId: 28, triggerValue: "Tidak Normal" }, // parentId ke id 28
+      { id: 33, subSectionId: 5, groupLabel: "Tumor:", fieldId: 131, order: 7, isRequired: true, parentId: 28, triggerValue: "Tidak Normal" }, // parentId ke id 28
+      { id: 34, subSectionId: 5, groupLabel: "c.", fieldId: 118, order: 8, isRequired: false, parentId: null, triggerValue: null },
     ]);
   },
 

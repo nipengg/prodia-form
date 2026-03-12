@@ -1,31 +1,37 @@
 import { Form, Typography } from 'antd';
 const { Text } = Typography;
 
-const StandardField = ({ field, subsection, section, lang, renderInput, getRules, index, allFields }) => {
-    const subSectionField = field.SubSectionField;
-    const isChild = !!subSectionField?.parentId;
-    const groupLabel = subSectionField?.groupLabel;
+const StandardField = ({ item, subsection, section, lang, renderInput, rules, index, allPivotFields }) => {
+    const field = item.Field;
+    const groupLabel = item.groupLabel;
 
-    const prevField = index > 0 ? allFields[index - 1].SubSectionField : null;
-    // (Cuma kalau punya label DAN labelnya beda ama atasnya)
-    const shouldShowText = groupLabel && groupLabel !== prevField?.groupLabel;
+    const getLevel = (currentItem, allFields, level = 0) => {
+        if (!currentItem.parentId) return level;
+        const parent = allFields.find(f => f.id === currentItem.parentId);
+        if (!parent) return level;
+        return getLevel(parent, allFields, level + 1);
+    };
+
+    const level = getLevel(item, allPivotFields);
+    const isChild = level > 0;
+
+    const prevItem = index > 0 ? allPivotFields[index - 1] : null;
+    const shouldShowText = groupLabel && groupLabel !== prevItem?.groupLabel;
 
     let labelWidth = '0px';
-
     if (groupLabel) {
-        labelWidth = isChild ? '65px' : '35px';
-    } else if (isChild) {
-        labelWidth = '0px';
+        labelWidth = isChild ? `${65 - (level * 5)}px` : '35px';
     }
 
     const containerStyle = {
         display: 'flex',
         alignItems: 'flex-start',
-        marginLeft: isChild ? '30px' : '0px',
+        marginLeft: `${level * 30}px`, 
         padding: isChild ? '2px 10px 1px 20px' : '0px',
-        borderLeft: isChild ? '2px solid #e8e8e8' : 'none',
+        borderLeft: isChild ? '2px solid #30cb2b' : 'none',
         marginBottom: isChild ? '4px' : '16px',
     };
+
     return (
         <div style={containerStyle}>
             <div style={{
@@ -43,12 +49,12 @@ const StandardField = ({ field, subsection, section, lang, renderInput, getRules
 
             <div style={{ flex: 1 }}>
                 <Form.Item
-                    name={['sections', section.id.toString(), 'subsections', subsection.id.toString(), 'fields', field.id.toString()]}
-                    rules={getRules(field)}
+                    name={['sections', section.id.toString(), 'subsections', subsection.id.toString(), 'subsectionFields', item.id.toString()]}
+                    rules={rules}
                     label={
                         <Text strong={!isChild} style={{ fontSize: isChild ? '13px' : '14px' }}>
                             {lang === 'Id' ? field.labelId : field.labelEn}
-                            {subSectionField?.isRequired && <span style={{ color: 'red', marginLeft: 4 }}>*</span>}
+                            {item.isRequired && <span style={{ color: 'red', marginLeft: 4 }}>*</span>}
                         </Text>
                     }
                 >

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import StandardField from './components/StandardField';
-import { Form, Input, Radio, Select, DatePicker, Button, Card, Typography, Space, Divider, Spin, Row, Col } from 'antd'
+import PrintView from './components/PrintView';
+import { Form, Input, Radio, Select, DatePicker, Card, Typography, Space, Divider, Spin, Row, Col } from 'antd'
 import axios from 'axios'
 import dayjs from 'dayjs'
 
@@ -16,49 +17,50 @@ function App() {
 
     const allValues = Form.useWatch([], form);
 
-const fetchFormStructure = async () => {
-    try {
-        const res = await axios.get(`${API_URL}/config/1`);
-        setFormData(res.data);
+    const fetchFormStructure = async () => {
+        try {
+            const res = await axios.get(`${API_URL}/config/1`);
+            const rawData = res.data;
+            setFormData(rawData);
 
-        const initialValues = { sections: {} };
+            const initialValues = { sections: {} };
 
-        res.data.Sections?.forEach(sec => {
-            const sKey = `${sec.id}`;
-            if (!initialValues.sections[sKey]) {
+            rawData.Sections?.forEach(sec => {
+                const sKey = `${sec.id}`;
                 initialValues.sections[sKey] = { subsections: {} };
-            }
 
-            sec.SubSections?.forEach(sub => {
-                const subKey = `${sub.id}`;
-                if (!initialValues.sections[sKey].subsections[subKey]) {
-                    initialValues.sections[sKey].subsections[subKey] = { fields: {} };
-                }
+                sec.SubSections?.forEach(sub => {
+                    const subKey = `${sub.id}`;
+                    initialValues.sections[sKey].subsections[subKey] = { subsectionFields: {} };
 
-                sub.Fields?.forEach(f => {
-                    if (f.defaultValue) {
-                        const fKey = `${f.id}`;
-                        const value = f.fieldType === 'date' ? dayjs(f.defaultValue) : f.defaultValue;
-                            
-                        initialValues.sections[sKey].subsections[subKey].fields[fKey] = value;
-                    }
+                    sub.SubSectionFields?.forEach(item => {
+                        if (item.Field?.defaultValue) {
+                            const pivotId = `${item.id}`;
+                            const val = item.Field.fieldType === 'date'
+                                ? dayjs(item.Field.defaultValue)
+                                : item.Field.defaultValue;
+
+                            initialValues.sections[sKey].subsections[subKey].subsectionFields[pivotId] = val;
+                        }
+                    });
                 });
             });
-        });
 
-        form.setFieldsValue(initialValues);
-        setLoading(false);
-    } catch (err) {
-        console.error("Gagal load form:", err);
-        setLoading(false);
-    }
-};
+            form.setFieldsValue(initialValues);
+            setLoading(false);
+        } catch (err) {
+            console.error("Gagal load form:", err);
+            setLoading(false);
+        }
+    };
 
     useEffect(() => { fetchFormStructure() }, [])
 
-    const getRules = (field) => {
-        const subSectionField = field.SubSectionField;
-        const rules = [{ required: Boolean(subSectionField?.isRequired), message: lang === 'Id' ? 'Wajib diisi' : 'Required' }];
+    const getRules = (field, item) => {
+        const rules = [{
+            required: Boolean(item?.isRequired),
+            message: lang === 'Id' ? 'Wajib diisi' : 'Required'
+        }];
 
         if (field.validation) {
             const v = field.validation;
@@ -150,30 +152,44 @@ const fetchFormStructure = async () => {
                                                 <Text strong>{sub.name}</Text>
                                             </Divider>
 
-                                            {sub.Fields?.map((field, index) => {
-                                                const subSectionField = field.SubSectionField;
+                                            {sub.SubSectionFields?.map((item, index) => {
+                                                const field = item.Field;
 
-                                                if (subSectionField?.parentId && subSectionField.triggerValue !== null) {
-                                                    const parentValue = allValues?.sections?.[`${section.id}`]?.subsections?.[`${sub.id}`]?.fields?.[`${subSectionField.parentId}`];
+                                                const checkVisibility = (currentItem) => {
+                                                    // Kalo root lgsg munculin
+                                                    if (!currentItem.parentId) return true;
 
-                                                    if (subSectionField.triggerValue === 'ANY') {
-                                                        if (!parentValue) return null;
-                                                    } else if (parentValue !== subSectionField.triggerValue) {
-                                                        return null;
-                                                    }
+                                                    // Cari data parent di list fields
+                                                    const parentItem = sub.SubSectionFields.find(p => p.id === currentItem.parentId);
+                                                    if (!parentItem) return true;
+
+                                                    // Ambil nilai parent dari form
+                                                    const parentValue = allValues?.sections?.[`${section.id}`]?.subsections?.[`${sub.id}`]?.subsectionFields?.[`${parentItem.id}`];
+
+                                                    // Syarat tampil: 
+                                                    // Nilai parent harus sesuai dengan triggerValue (kalo ada triggerValue)
+                                                    // atau kalau triggerValue null, asal parent-nya tampil, dia tampil
+                                                    const isTriggerMatch = currentItem.triggerValue === null || String(parentValue) === String(currentItem.triggerValue);
+
+                                                    // yang paling penting parentnya sendiri harus tampil
+                                                    return isTriggerMatch && checkVisibility(parentItem);
+                                                };
+
+                                                if (!checkVisibility(item)) {
+                                                    return null;
                                                 }
 
                                                 return (
                                                     <StandardField
-                                                        key={field.id}
+                                                        key={item.id}
                                                         section={section}
                                                         subsection={sub}
-                                                        field={field}
+                                                        item={item}
                                                         lang={lang}
                                                         renderInput={renderFieldInput}
-                                                        getRules={getRules}
+                                                        rules={getRules(field, item)}
                                                         index={index}
-                                                        allFields={sub.Fields}
+                                                        allPivotFields={sub.SubSectionFields}
                                                     />
                                                 );
                                             })}
@@ -184,7 +200,7 @@ const fetchFormStructure = async () => {
                         </Row>
                     </Card>
                 ))}
-                <Button type="primary" htmlType="submit" size="large" block>SIMPAN REKAM MEDIS</Button>
+                <PrintView formData={formData} values={allValues} />
             </Form>
 
             <Card title="Debug: Live Values" style={{ marginTop: 20, background: '#1e1e1e' }} headStyle={{ color: '#fff' }}>

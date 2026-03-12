@@ -14,16 +14,17 @@ router.get('/:id', async (req, res) => {
                     separate: true,
                     order: [['order', 'ASC']],
                     include: [{
-                        model: Field,
-                        through: { 
-                            attributes: ['order', 'isRequired', 'groupLabel', 'parentId', 'triggerValue'] 
-                        },
+                        model: SubSectionField,
+                        as: 'SubSectionFields',
                         include: [{
-                            model: Option,
+                            model: Field,
                             include: [{
-                                model: OptionValue,
-                                separate: true,
-                                order: [['order', 'ASC']]
+                                model: Option,
+                                include: [{
+                                    model: OptionValue,
+                                    separate: true,
+                                    order: [['order', 'ASC']]
+                                }]
                             }]
                         }]
                     }]
@@ -32,15 +33,14 @@ router.get('/:id', async (req, res) => {
         });
 
         if (!formData) return res.status(404).json({ message: "Form gak ketemu!" });
-        
+
         const plainData = formData.get({ plain: true });
-        
+
         plainData.Sections.forEach(section => {
             section.SubSections.forEach(sub => {
-                if (sub.Fields) {
-                    sub.Fields.sort((a, b) => {
-                        return a.SubSectionField.order - b.SubSectionField.order;
-                    });
+                if (sub.SubSectionFields) {
+                    // Urutkan berdasarkan urutan tampilan di form
+                    sub.SubSectionFields.sort((a, b) => a.order - b.order);
                 }
             });
         });
